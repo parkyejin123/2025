@@ -1,7 +1,104 @@
 import { useEffect, useMemo, useState } from "react";
 import { MapContainer, TileLayer, Marker, useMap } from "react-leaflet";
 import L from "leaflet";
-import "leaflet/dist/leaflet.css";
+import "leaflet/dist/leaflet.cssimport streamlit as st
+import random
+
+# --------------------
+# 초기 세팅
+# --------------------
+st.set_page_config(page_title="환경을 지키자!", page_icon="🌱", layout="wide")
+
+if "trees" not in st.session_state:
+    st.session_state.trees = {}  # 나라별 나무 성장 단계 저장
+if "attendance" not in st.session_state:
+    st.session_state.attendance = []  # 출석체크 기록
+
+# --------------------
+# 나라별 대표 나무와 동식물 데이터
+# --------------------
+nation_data = {
+    "대한민국": {"tree": "소나무", "animals": ["🦉 올빼미", "🦋 나비"]},
+    "일본": {"tree": "벚나무", "animals": ["🦌 사슴", "🪲 풍뎅이"]},
+    "미국": {"tree": "참나무", "animals": ["🦅 독수리", "🐿️ 다람쥐"]},
+    "호주": {"tree": "유칼립투스", "animals": ["🦘 캥거루", "🐨 코알라"]},
+    "브라질": {"tree": "아마존 고무나무", "animals": ["🦜 앵무새", "🐒 원숭이"]},
+    "중국": {"tree": "대나무", "animals": ["🐼 판다", "🦋 잠자리"]},
+    "인도": {"tree": "망고나무", "animals": ["🐘 코끼리", "🦚 공작"]},
+    "이집트": {"tree": "종려나무", "animals": ["🐪 낙타", "🦂 전갈"]},
+}
+
+# --------------------
+# 함수: 나무 성장 단계 이름
+# --------------------
+def get_tree_stage(level):
+    stages = ["🌱 묘목", "🌿 어린나무", "🌳 큰 나무"]
+    return stages[min(level, len(stages)-1)]
+
+# --------------------
+# 메인 화면
+# --------------------
+st.title("🌍 환경을 지키자!")
+st.write("출석체크하고 물과 비료를 주어 나라별 나무를 키워보세요. 나무가 자라면 숲이 되살아나고 동식물이 찾아옵니다!")
+
+# --------------------
+# 출석체크
+# --------------------
+if st.button("출석체크 하기 ✅"):
+    st.session_state.attendance.append("출석")
+    st.success("오늘도 출석 완료! 원하는 나라에서 나무를 키워보세요 🌱")
+
+# --------------------
+# 나라 선택
+# --------------------
+choice = st.selectbox("나라를 선택하세요:", list(nation_data.keys()))
+
+tree_name = nation_data[choice]["tree"]
+
+if choice not in st.session_state.trees:
+    st.session_state.trees[choice] = 0  # 처음 선택 시 묘목 단계
+
+# --------------------
+# 물주기 / 비료주기 버튼
+# --------------------
+col1, col2 = st.columns(2)
+with col1:
+    if st.button("💧 물 주기"):
+        st.session_state.trees[choice] += 1
+        st.balloons()  # 애니메이션 효과
+with col2:
+    if st.button("🪴 비료 주기"):
+        st.session_state.trees[choice] += 1
+        st.snow()  # 또 다른 효과
+
+# --------------------
+# 나무 성장 상태 표시
+# --------------------
+level = st.session_state.trees[choice]
+st.subheader(f"{choice}의 대표 나무: {tree_name}")
+st.write(f"현재 성장 단계: {get_tree_stage(level)}")
+
+# --------------------
+# 환경 기여 정보 표시
+# --------------------
+if level > 0:
+    st.info(f"{tree_name}는 공기를 정화하고 지구 온난화를 줄이는 데 큰 도움을 줍니다!")
+
+# --------------------
+# 동식물 등장
+# --------------------
+if level >= 2:
+    st.subheader("🌳 숲이 되살아나면서 나타난 동식물")
+    for animal in nation_data[choice]["animals"]:
+        st.write(animal)
+
+# --------------------
+# 전체 숲 상황
+# --------------------
+st.header("🌏 내가 키운 세계의 숲")
+for nation, lv in st.session_state.trees.items():
+    st.write(f"{nation}: {get_tree_stage(lv)}")
+
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
