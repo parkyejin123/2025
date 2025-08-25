@@ -44,6 +44,7 @@ with tab1:
     st.metric("지구 건강 점수", f"{st.session_state.score} 점")
     st.progress(min(st.session_state.score/100, 1.0))
     
+    # 지도 생성
     m = folium.Map(location=[20,0], zoom_start=2)
     for country, data in countries.items():
         folium.Marker(location=data["coords"], popup=country, tooltip="나무 보기").add_to(m)
@@ -58,8 +59,10 @@ with tab1:
         st.subheader(f"{selected_country}의 나무: {tree_emoji}")
         today = date.today()
         
+        # 하루 1회 물주기
         if st.session_state.last_watered[selected_country] != today:
-            if st.button("💧 물주기"):
+            water_clicked = st.button("💧 물주기")
+            if water_clicked:
                 if growth_stage < len(info["tree"]) - 1:
                     placeholder = st.empty()
                     for stage in range(growth_stage, growth_stage+2):
@@ -68,17 +71,18 @@ with tab1:
                             time.sleep(0.5)
                     st.session_state.growth[selected_country] += 1
                     growth_stage += 1
-                    
+
+                    # 성체 나무일 경우 점수 & 나만의 숲 추가
                     if growth_stage == len(info["tree"]) - 1:
                         st.session_state.score += 10
                         st.session_state.my_forest.append(f"{selected_country} {info['tree'][-1]} {info['animal']}")
-                
+
                 st.session_state.last_watered[selected_country] = today
-                st.experimental_rerun()
         else:
             st.info("오늘은 이미 물을 줬습니다. 내일 다시 와주세요 🌞")
         
         st.success(info["tree_info"])
+        # 성체 나무 → 동물 표시
         if growth_stage == len(info["tree"]) - 1:
             st.subheader(f"대표 동물: {info['animal']}")
             st.info(info["animal_info"])
