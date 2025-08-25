@@ -1,1 +1,1 @@
-streamlit run newtest.py
+streamlit run test.py
